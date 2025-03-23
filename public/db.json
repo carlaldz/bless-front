@@ -1,0 +1,51 @@
+[
+
+    {
+        "id": 2,
+        "titulo": "Fiesta del Viernes",
+        "descripción": "Celebra el inicio del fin de semana con nosotros.",
+        "fecha": "21/03/2025",
+        "edad": 18,
+        "horario": "00:00 - 06:00",
+        "DJ": "DJ Maria",
+        "dressCode": "Casual",
+        "musica": "Dembow / Reggaeton / Comercial / Old School / Clásicos",
+        "cartel": "https://res.cloudinary.com/dbfdph0aj/image/upload/v1742218773/3_rgmrue.jpg"
+    },
+    {   
+        "id": 3,
+        "titulo": "Fiesta del Sábado",
+        "descripción": "La mejor música electrónica en vivo.",
+        "fecha": "22/03/2025",
+        "edad": 18,
+        "horario": "00:00 - 06:00",
+        "DJ": "DJ Carlos",
+        "dressCode": "Casual",
+        "musica": "Dembow / Reggaeton / Comercial / Old School / Clásicos",
+        "cartel": "https://res.cloudinary.com/dbfdph0aj/image/upload/v1742218773/2_t4hgdl.jpg"
+    },
+    {
+        "id": 4,
+        "titulo": "Fiesta del Viernes",
+        "descripción": "Una noche para bailar hasta el amanecer.",
+        "fecha": "28/03/2025",
+        "edad": 18,
+        "horario": "00:00 - 06:00",
+        "DJ": "DJ Laura",
+        "dressCode": "Casual",
+        "musica": "Dembow / Reggaeton / Comercial / Old School / Clásicos",
+        "cartel": "https://res.cloudinary.com/dbfdph0aj/image/upload/v1742218773/5_nulmjq.jpg"
+    },
+    {   
+        "id": 5,
+        "titulo": "Fiesta del Sábado",
+        "descripción": "Cierra el mes con la mejor fiesta.",
+        "fecha": "29/03/2025",
+        "edad": 18,
+        "horario": "00:00 - 06:00",
+        "DJ": "DJ Pedro",
+        "dressCode": "Casual",
+        "musica": "Dembow / Reggaeton / Comercial / Old School / Clásicos",
+        "cartel": "https://res.cloudinary.com/dbfdph0aj/image/upload/v1742218773/4_ql0dbx.jpg"
+    }
+]

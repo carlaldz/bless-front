@@ -1,13 +1,15 @@
 form {
-    border: 3px solid white; /* Cambié a rojo (#f00) para mejor visibilidad, puedes usar otro color */
+    border: 3px solid white; 
     width: 30%; 
-    padding: 20px; /* Añadir un poco de espacio interno */
+    padding: 20px; 
     border-radius: 10px; /* Bordes redondeados */
     display: flex; 
     flex-direction: column;
     align-items: center;
 }
-  
+h2 {
+    color: white !important;
+}
 input[type=email], input[type=password] {
     width: 85%;
     padding: 12px 20px;
@@ -18,7 +20,6 @@ input[type=email], input[type=password] {
 }
   
 button {
-    background-color: red;
     color: white;
     padding: 14px 20px;
     margin: 8px 0;

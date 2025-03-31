@@ -1,6 +1,7 @@
 import { useState } from "react"; 
 import { useNavigate } from "react-router-dom";
-import * as BlessApi from "/web/src/services/api-service.js";
+import BlessApi from "../services/api-service";
+import "./addEvent.css"
 
 function AddEvent({ addEvent }) {  
     const [titulo, setTitulo] = useState(""); 
@@ -32,7 +33,7 @@ function AddEvent({ addEvent }) {
 
         const newEvent = { titulo, descripcion, edad: parseInt(edad, 10), cartelUrl, fecha, horario, dressCode, DJ, musica };
 
-        service.createEvent(newEvent)
+        BlessApi.createEvent(newEvent)
             .then(res => {
                 
                 setTitulo(""); 

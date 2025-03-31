@@ -9,6 +9,8 @@ import Login from './pages/login';
 import { AuthProvider } from './contexts/auth-context';
 import Calendario from './pages/calendario';
 import Album from "./pages/album"
+import AddEvent from './pages/AddEvent';
+
 
 function App() {
   return (
@@ -21,8 +23,9 @@ function App() {
     <Route path="/calendario" element={<Calendario/>} />
     <Route path="/album" element={<Album/>}/>
     <Route path="/login" element={<Login/>}/>
-  </Routes>
-  </AuthProvider>
+    <Route path="/addevent" element={<AddEvent/>}/>
+    </Routes>
+    </AuthProvider>
   </Router>
   )
 }

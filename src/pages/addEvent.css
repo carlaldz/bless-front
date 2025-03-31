@@ -1,0 +1,49 @@
+body {
+    background-color: black;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid white;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+input, textarea {
+    background-color: transparent;
+    color: white;
+    border: 1px solid white;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+}
+
+input::placeholder, textarea::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+input:focus, textarea:focus {
+    outline: none;
+    border-color: #00bcd4;
+}
+
+button {
+    background-color: #00bcd4;
+    color: black;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+button:hover {
+    background-color: #008ba3;
+}

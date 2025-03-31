@@ -1,45 +1,99 @@
-import axios from "axios"; 
-
+import axios from "axios";
+const API_BASE_URL = "http://localhost:5000"; 
+// Configuración base de axios
 const http = axios.create({
-    baseURL: "http://localhost:3000/api/v1/",
-    withCredentials: true, 
-}); 
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000",
+  withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
+// Interceptor de respuestas
 http.interceptors.response.use(
-    (response) => response.data,
-    (error) => {
-        if (error.response) {
-            console.error("Response Error: ", error.response);
-        } else if (error.request) {
-            console.error("Request Error: ", error.request);
-        } else {
-            console.error("General Error: ", error.message);
-        }
-        return Promise.reject(error);
+  (response) => response.data,
+  (error) => {
+    // Manejo mejorado de errores
+    let errorMessage = "Error de conexión";
+    let status = error.response?.status;
+    
+    if (error.response) {
+      errorMessage = error.response.data?.message || 
+                    error.response.data?.error || 
+                    error.message;
+      
+      // Manejo específico para errores 401 (No autorizado)
+      if (status === 401) {
+        // Puedes redirigir al login aquí si lo prefieres
+        console.warn("No autorizado - redirigiendo al login");
+      }
+    } else if (error.request) {
+      errorMessage = "No se recibió respuesta del servidor";
     }
+
+    const errorDetails = {
+      status,
+      data: error.response?.data,
+      message: errorMessage,
+      originalError: error,
+    };
+    
+    console.error("Error en la petición:", errorDetails);
+    return Promise.reject(errorDetails);
+  }
 );
 
-const profile = () => http.get("/users/me"); 
+// Funciones de autenticación
+const register = (userData) => http.post("/users", userData);
 
-const register = (user) => http.post("/users", user); 
+const login = (credentials) => http.post("/login", credentials); // Cambiado de "/sessions" a "/login"
 
-const login = (user) => http.post("/sessions", user); 
+const logout = () => http.post("/logout");
 
+const getCurrentUser = () => http.get("/users/me");
+
+// Funciones de eventos
 const listEvents = ({ page, date, limit = 10 }) => {
-    limit = Number.isNaN(Number(limit)) || Number(limit) <= 0 ? 1 : limit;
-    page = Number.isNaN(Number(page)) || Number(page) <= 0 ? undefined : page;
+  const params = {
+    limit: Number(limit) > 0 ? Number(limit) : 10,
+    page: Number(page) > 0 ? Number(page) : 1,
+    date: date && !isNaN(Date.parse(date)) ? new Date(date).toISOString() : undefined,
+  };
 
-    date =
-    typeof date === "string" && !isNaN(Date.parse(date)) ? date : undefined;
-    console.log("Parámetros enviados:", { limit, page, date })
-
-    return http.get("/eventos", {
-        params: {limit, page, date },
-      });
+  return http.get("/events", { params }); // Cambiado de "/eventos" a "/events"
 };
 
-const getEvent = (id) => http.get(`/eventos/${id}`); 
+const getEvent = (id) => {
+  if (!id) throw new Error("Se requiere ID del evento");
+  return http.get(`/events/${id}`);
+};
 
-const deleteEvent = (id) => http.delete(`/eventos/${id}`); 
+const createEvent = (eventData) => http.post("/events", eventData);
 
-export default { login, listEvents, getEvent, deleteEvent, register, profile}; 
+const updateEvent = (id, eventData) => {
+  if (!id) throw new Error("Se requiere ID del evento");
+  return http.patch(`/events/${id}`, eventData);
+};
+
+const deleteEvent = (id) => {
+  if (!id) throw new Error("Se requiere ID del evento");
+  return http.delete(`/events/${id}`);
+};
+
+// Objeto API
+const BlessApi = {
+  // Autenticación
+  login,
+  logout,
+  register,
+  getCurrentUser,
+  
+  // Eventos
+  listEvents,
+  getEvent,
+  createEvent,
+  updateEvent,
+  deleteEvent,
+};
+
+export default BlessApi;

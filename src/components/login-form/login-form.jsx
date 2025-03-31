@@ -1,39 +1,32 @@
 import "./login-form.css";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom"; 
+import { useAuth } from "../../contexts/auth-context";
+import BlessApi from "../../services/api-service"; 
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(""); 
+  const navigate = useNavigate (); 
+  const { login } = useAuth(); 
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     
     try {
-      const response = await fetch("http://localhost:5000/api/sessions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-        credentials: "include", 
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.errors?.email || "Credenciales incorrectas");
-      }
-
-      const user = await response.json();
+      const user = await BlessApi.login({ email, password });
       console.log("Usuario logueado:", user);
-      // Aquí puedes redirigir al usuario a otra página, como su perfil
-      setError(""); 
+      login(user);
+      setError("");
+      navigate("/");
     } catch (error) {
       console.error("Error en login:", error.message);
-      setError(error.message); 
+      setError(error.message || "Credenciales incorrectas");
     }
   };
 
   return (
-     
     <form onSubmit={handleSubmit}>
       <h2>Inicia Sesión:</h2>
       <input
@@ -52,9 +45,8 @@ const LoginForm = () => {
       />
       
       <button type="submit">Login</button>
-      {error && <p className="error">{error}</p>} {/* Mostrar el error si existe */}
+      {error && <p className="error">{error}</p>}
     </form>
-    
   );
 };
 

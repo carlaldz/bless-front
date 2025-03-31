@@ -1,99 +1,173 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import  BlessApi from "../../services/api-service";
 import { useNavigate } from "react-router-dom";
-import { useAuthContext } from "../../contexts/auth-context";
+import { useAuth } from "../../contexts/auth-context";
+import BlessApi from "../../services/api-service";
 import "./register-form.css";
 
 function RegisterForm() {
-  const { register, handleSubmit, formState, setError } = useForm();
-  const { login } = useAuthContext();
+  const { register, handleSubmit, formState, setError, clearErrors } = useForm();
+  const { login } = useAuth();
   const navigate = useNavigate();
-  const errors = formState.errors;
+  const { errors, isSubmitting } = formState;
+  const [apiError, setApiError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  const handleRegister = async (user) => {
-    const formData = new FormData();
-
-    formData.append("nombre", user.nombre);
-    formData.append("apellidos", user.apellidos);
-    formData.append("email", user.email);
-    formData.append("password", user.password);
-
+  const handleRegister = async (userData) => {
     try {
-      await BlessApi.register(formData);
-      const data = await BlessApi.login(user);
-  
-      login(data);
-      setSuccessMessage("Usuario creado correctamente");
-      navigate("/");
-    } catch (error) {
-      if (error.response && error.response.data && error.response.data.errors) {
-        const serverErrors = error.response.data.errors;
-        if (serverErrors.email) {
-          // Si existe un error en email, establecemos el mensaje "Email ya registrado"
-          setError("email", { message: "Email ya registrado" });
-        } else {
-          // Para otros errores, recorremos y asignamos el mensaje que venga del servidor
-          Object.keys(serverErrors).forEach((inputName) =>
-            setError(inputName, { message: serverErrors[inputName] })
-          );
-        }
-      } else {
-          console.error("Error inesperado:", error);
-          // Aquí podrías establecer un error general en el formulario o mostrar un mensaje genérico
+      setApiError(""); 
+      clearErrors();
+      
+      const response = await BlessApi.register({
+        name: userData.nombre,
+        lastName: userData.apellidos,
+        email: userData.email,
+        password: userData.password
+      });
+
+      if (response) {
+        setSuccessMessage("¡Registro exitoso! Redirigiendo...");
+        
+        try {
+          const loginResponse = await BlessApi.login({
+            email: userData.email,
+            password: userData.password
+          });
+          
+          if (loginResponse.user) {
+            login(loginResponse.user);
+            navigate("/");
+          }
+        } catch (loginError) {
+          console.error("Error en auto-login:", loginError);
+          navigate("/login", { state: { registered: true } });
         }
       }
-    };
+    } catch (error) {
+      console.error("Error en registro:", error);
+      
+      if (error.data?.errors) {
+        const serverErrors = error.data.errors;
+        
+        const fieldMapping = {
+          name: "nombre",
+          lastName: "apellidos",
+          email: "email",
+          password: "password"
+        };
+        
+        Object.keys(serverErrors).forEach((field) => {
+          const frontendField = fieldMapping[field] || field;
+          setError(frontendField, { 
+            type: "server", 
+            message: serverErrors[field] 
+          });
+        });
+      } else if (error.message) {
+        setApiError(error.message);
+      } else {
+        setApiError("Error desconocido durante el registro");
+      }
+    }
+  };
 
   return (
-    <form onSubmit={handleSubmit(handleRegister)}>
-      <h2>Regístrate:</h2>
+    <div className="register-page">
+      <form onSubmit={handleSubmit(handleRegister)} className="register-form">
+        <h2 className="register-title">Regístrate:</h2>
+        
+        {apiError && <div className="register-error">{apiError}</div>}
+        {successMessage && <div className="register-success">{successMessage}</div>}
 
-      <input
-        type="text"
-        className={`form-control ${errors.nombre ? "is-invalid" : ""}`}
-        placeholder="Introduce tu nombre"
-        {...register("nombre", { required: "Campo obligatorio" })}
-        style={{ width: "85%" }}
-        required
-      />
-      {errors.nombre && <p className="error">{errors.nombre.message}</p>}
+        <div className="register-field">
+          <label htmlFor="nombre" className="register-label"></label>
+          <input
+            id="nombre"
+            type="text"
+            className={`register-input ${errors.nombre ? "register-input-error" : ""}`}
+            placeholder="Introduce tu nombre"
+            {...register("nombre", { 
+              required: "Campo obligatorio",
+              minLength: {
+                value: 2,
+                message: "Mínimo 2 caracteres"
+              }
+            })}
+          />
+          {errors.nombre && (
+            <div className="register-error-message">{errors.nombre.message}</div>
+          )}
+        </div>
 
-      <input
-        type="text"
-        className={`form-control ${errors.apellidos ? "is-invalid" : ""}`}
-        placeholder="Introduce tus apellidos"
-        {...register("apellidos", { required: "Campo obligatorio" })}
-        style={{ width: "85%" }}
-        required
-      />
-      {errors.apellidos && <p className="error">{errors.apellidos.message}</p>}
+        <div className="register-field">
+          <label htmlFor="apellidos" className="register-label"></label>
+          <input
+            id="apellidos"
+            type="text"
+            className={`register-input ${errors.apellidos ? "register-input-error" : ""}`}
+            placeholder="Introduce tus apellidos"
+            {...register("apellidos", { 
+              required: "Campo obligatorio",
+              minLength: {
+                value: 2,
+                message: "Mínimo 2 caracteres"
+              }
+            })}
+          />
+          {errors.apellidos && (
+            <div className="register-error-message">{errors.apellidos.message}</div>
+          )}
+        </div>
 
-      <input
-        type="email"
-        className={`form-control ${errors.email ? "is-invalid" : ""}`}
-        placeholder="Introduce tu email"
-        {...register("email", { required: "Campo obligatorio" })}
-        required
-      />
-      {errors.email && <p className="error">{errors.email.message}</p>}
+        <div className="register-field">
+          <label htmlFor="email" className="register-label"></label>
+          <input
+            id="email"
+            type="email"
+            className={`register-input ${errors.email ? "register-input-error" : ""}`}
+            placeholder="Introduce tu email"
+            {...register("email", { 
+              required: "Campo obligatorio",
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: "Email no válido"
+              }
+            })}
+          />
+          {errors.email && (
+            <div className="register-error-message">{errors.email.message}</div>
+          )}
+        </div>
 
-      <input
-        type="password"
-        className={`form-control ${errors.password ? "is-invalid" : ""}`}
-        placeholder="****"
-        {...register("password", { required: "Campo obligatorio" })}
-      />
-      {errors.password && <p className="error">{errors.password.message}</p>}
+        <div className="register-field">
+          <label htmlFor="password" className="register-label"></label>
+          <input
+            id="password"
+            type="password"
+            className={`register-input ${errors.password ? "register-input-error" : ""}`}
+            placeholder="******"
+            {...register("password", { 
+              required: "Campo obligatorio",
+              minLength: {
+                value: 6,
+                message: "Mínimo 6 caracteres"
+              }
+            })}
+          />
+          {errors.password && (
+            <div className="register-error-message">{errors.password.message}</div>
+          )}
+        </div>
 
-      <button type="submit" disabled={Object.keys(errors).length > 0}>
-        Registrarse
-      </button>
-
-      {/* Mostrar el mensaje de éxito si existe */}
-      {successMessage && <p className="success">{successMessage}</p>}
-    </form>
+        <button 
+          type="submit" 
+          className="register-button"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Registrando..." : "Registrarse"}
+        </button>
+      </form>
+    </div>
   );
 }
 

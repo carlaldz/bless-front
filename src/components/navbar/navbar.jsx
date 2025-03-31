@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom"; 
 import "./navbar.css"
-import { useAuthContext } from "../../contexts/auth-context";
+import { useAuth } from "../../contexts/auth-context";
 
 const Navbar = () => {
     
-    const { user } = useAuthContext();
+    const { user } = useAuth();
     console.log("Valor del contexto de autenticación:", user);
 
     return (
@@ -38,6 +38,12 @@ const Navbar = () => {
                 </Link>
               </li>
               
+                {user && user.email === import.meta.env.VITE_ADMIN_EMAILS?.split(',').includes(user.email) && (
+                  <li>
+                    <Link to="/add-event">Añadir Evento</Link>
+                
+                  </li>
+                )}
               <li className="nav-item">
                 <Link className="nav-link text-white" to="https://www.fourvenues.com/en/bless-the-club-1">
                   Entradas

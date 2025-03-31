@@ -1,67 +1,58 @@
 import axios from "axios";
-const API_BASE_URL = "http://localhost:5000"; 
-// Configuración base de axios
+
+const LOCAL_API_URL = "http://localhost:5000/api/v1";
+const PRODUCTION_API_URL = import.meta.env.VITE_API_URL || "https://tu-backend-deploy.com/api/v1";
+
 const http = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000",
+  baseURL: import.meta.env.PROD ? PRODUCTION_API_URL : LOCAL_API_URL,
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Interceptor de respuestas
 http.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    // Manejo mejorado de errores
+    const status = error.response?.status;
     let errorMessage = "Error de conexión";
-    let status = error.response?.status;
-    
+    let errorData = {};
+
     if (error.response) {
-      errorMessage = error.response.data?.message || 
-                    error.response.data?.error || 
+      errorData = error.response.data;
+      errorMessage = errorData?.message || 
+                    errorData?.error?.message || 
                     error.message;
-      
-      // Manejo específico para errores 401 (No autorizado)
+
       if (status === 401) {
-        // Puedes redirigir al login aquí si lo prefieres
         console.warn("No autorizado - redirigiendo al login");
       }
     } else if (error.request) {
-      errorMessage = "No se recibió respuesta del servidor";
+      errorMessage = "El servidor no respondió";
+      errorData = { code: "ECONNABORTED" };
     }
 
     const errorDetails = {
       status,
-      data: error.response?.data,
+      data: errorData,
       message: errorMessage,
       originalError: error,
     };
     
-    console.error("Error en la petición:", errorDetails);
+    console.error("[API Error]", errorDetails);
     return Promise.reject(errorDetails);
   }
 );
 
-// Funciones de autenticación
+
 const register = (userData) => http.post("/users", userData);
-
-const login = (credentials) => http.post("/login", credentials); // Cambiado de "/sessions" a "/login"
-
-const logout = () => http.post("/logout");
-
+const login = (credentials) => http.post("/sessions", credentials); 
+const logout = () => http.delete("/sessions"); 
 const getCurrentUser = () => http.get("/users/me");
 
-// Funciones de eventos
-const listEvents = ({ page, date, limit = 10 }) => {
-  const params = {
-    limit: Number(limit) > 0 ? Number(limit) : 10,
-    page: Number(page) > 0 ? Number(page) : 1,
-    date: date && !isNaN(Date.parse(date)) ? new Date(date).toISOString() : undefined,
-  };
 
-  return http.get("/events", { params }); // Cambiado de "/eventos" a "/events"
-};
+const listEvents = () => http.get("/events");
+
 
 const getEvent = (id) => {
   if (!id) throw new Error("Se requiere ID del evento");
@@ -69,26 +60,16 @@ const getEvent = (id) => {
 };
 
 const createEvent = (eventData) => http.post("/events", eventData);
+const updateEvent = (id, eventData) => http.patch(`/events/${id}`, eventData);
+const deleteEvent = (id) => http.delete(`/events/${id}`);
 
-const updateEvent = (id, eventData) => {
-  if (!id) throw new Error("Se requiere ID del evento");
-  return http.patch(`/events/${id}`, eventData);
-};
 
-const deleteEvent = (id) => {
-  if (!id) throw new Error("Se requiere ID del evento");
-  return http.delete(`/events/${id}`);
-};
-
-// Objeto API
 const BlessApi = {
-  // Autenticación
   login,
   logout,
   register,
   getCurrentUser,
   
-  // Eventos
   listEvents,
   getEvent,
   createEvent,

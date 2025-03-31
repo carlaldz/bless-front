@@ -5,7 +5,7 @@
     z-index: 1000; 
 }
 
-.whatsapp-button ion-icon {
+.whatsapp-button IonIcon {
     font-size: 64px;
     color: #0cc0df; 
     margin: 20px; 

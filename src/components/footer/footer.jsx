@@ -1,4 +1,5 @@
 import "../footer/footer.css";
+import { IonIcon } from 'ionicons/react';
 
 const Footer = () => {
     return (
@@ -14,8 +15,8 @@ const Footer = () => {
             <div className="der">
                 <h3>Conecta con nosotros</h3>
                     <div className = "redes">
-                        <a href='https://www.tiktok.com/@bless.the.club' target='_blank'><ion-icon name="logo-tiktok" style={{ color: 'white'}}></ion-icon></a>
-                        <a href='https://www.instagram.com/bless.theclub/' target='_blank'><ion-icon name="logo-instagram" style={{ color: 'white'}}></ion-icon></a>
+                        <a href='https://www.tiktok.com/@bless.the.club' target='_blank'><IonIcon name="logo-tiktok" style={{ color: 'white'}}></IonIcon></a>
+                        <a href='https://www.instagram.com/bless.theclub/' target='_blank'><IonIcon name="logo-instagram" style={{ color: 'white'}}></IonIcon></a>
                     </div>
             </div>
         </footer>

@@ -1,5 +1,6 @@
 import "./carousel.css";
 
+
 const carousel = () => {
     return (
         <div id="carouselExampleRide" className="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="2000">

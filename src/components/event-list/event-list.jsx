@@ -4,48 +4,71 @@ import EventCard from "../../components/event-card/event-card";
 import "./event-list.css";
 import React from 'react';
 
-function EventList({ limit, page }) {
+function EventList() {
     const [eventos, setEventos] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [reload, setReload] = useState(false);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        setLoading(true);
-        BlessApi.listEvents({ limit, page })
-            .then((response) => {
-                console.log("Respuesta de la API:", response);
+        const fetchEventos = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                
+                // Llamada simplificada sin parámetros de paginación
+                const eventos = await BlessApi.listEvents();
+                
+                if (!Array.isArray(eventos)) {
+                    throw new Error('Formato de respuesta inválido');
+                }
 
-                const eventosTransformados = response.map(evento => ({
+                const eventosTransformados = eventos.map(evento => ({
                     ...evento,
-                    id: evento.id || evento._id
+                    id: evento.id || evento._id?.toString()
                 }));
 
-                setEventos(eventosTransformados); 
-                setLoading(false);
-            })
-            .catch((error) => {
+                setEventos(eventosTransformados);
+            } catch (error) {
                 console.error("Error al obtener eventos:", error);
+                setError(error.message || "Error cargando eventos");
+            } finally {
                 setLoading(false);
-            });
-    }, [limit, page, reload]);
+            }
+        };
 
-    if (loading) return <p>Cargando eventos...</p>;
+        fetchEventos();
+    }, []); // Eliminadas dependencias de paginación
 
-    const handleEventDeletion = (id) => {
-        BlessApi.deleteEvent(id)
-            .then(() => {
-                
-                setEventos((prevEventos) => prevEventos.filter(evento => evento.id !== id));
-                setReload(prev => !prev); 
-            })
-            .catch((error) => console.error("Error al eliminar el evento:", error));
+    const handleEventDeletion = async (id) => {
+        try {
+            await BlessApi.deleteEvent(id);
+            // Actualización optimista del estado
+            setEventos(prev => prev.filter(evento => evento.id !== id));
+        } catch (error) {
+            console.error("Error al eliminar evento:", error);
+            setError("No se pudo eliminar el evento");
+        }
     };
+
+    if (loading) return <div className="loading-container">Cargando eventos...</div>;
+    
+    if (error) return (
+        <div className="error-container">
+            <p>❌ Error: {error}</p>
+            <button onClick={() => window.location.reload()}>Reintentar</button>
+        </div>
+    );
+
+    if (eventos.length === 0) return <p>No hay eventos disponibles</p>;
 
     return (
         <div className="event-list">
             {eventos.map((evento, index) => (
                 <React.Fragment key={evento.id}>
-                    <EventCard evento={evento} onDelete={handleEventDeletion} />
+                    <EventCard 
+                        evento={evento} 
+                        onDelete={handleEventDeletion} 
+                    />
                     {index < eventos.length - 1 && <hr className="event-divider" />}
                 </React.Fragment>
             ))}

@@ -74,7 +74,7 @@ export function AuthProvider({ children }) {
   };
 
   if (loading) {
-    return <div className="loading-auth">Verificando sesión...</div>;
+    return <div className="loading-auth"></div>;
   }
 
   return (

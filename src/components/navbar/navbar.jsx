@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom"; 
 import "./navbar.css"
 import { useAuth } from "../../contexts/auth-context";
+import { IonIcon } from 'ionicons/react';
 
 const Navbar = () => {
     
@@ -54,11 +55,11 @@ const Navbar = () => {
           </div>
           <div className = "login-icon">
           <Link to="/login">
-          <ion-icon
+          <IonIcon
               name="person-circle-outline"
               className={user ? 'logged-in' : ''}
               style={{ color: user ? '#0cc0df' : 'white' }}
-          ></ion-icon>
+          ></IonIcon>
           </Link>
           </div>
         </div>
